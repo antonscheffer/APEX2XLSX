@@ -13,7 +13,7 @@ prompt  APPLICATION 108 - Demo for APEX to XLSX
 -- Application Export:
 --   Application:     108
 --   Name:            Demo for APEX to XLSX
---   Date and Time:   19:51 Monday October 15, 2018
+--   Date and Time:   21:45 Tuesday October 16, 2018
 --   Exported By:     ANTON
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -146,7 +146,7 @@ wwv_flow_api.create_flow(
   p_default_region_template=> 5093701502208017 + wwv_flow_api.g_id_offset,
   p_error_template=> 5090001438208013 + wwv_flow_api.g_id_offset,
   p_page_protection_enabled_y_n=> 'Y',
-  p_checksum_salt_last_reset => '20181015195000',
+  p_checksum_salt_last_reset => '20181016214239',
   p_max_session_length_sec=> 28800,
   p_home_link=> 'f?p=&APP_ID.:1:&SESSION.',
   p_flow_language=> 'en',
@@ -189,7 +189,7 @@ wwv_flow_api.create_flow(
   p_default_listr_template => 5092607598208016 + wwv_flow_api.g_id_offset,
   p_default_irr_template => 5093309098208017 + wwv_flow_api.g_id_offset,
   p_last_updated_by => 'ANTON',
-  p_last_upd_yyyymmddhh24miss=> '20181015195000',
+  p_last_upd_yyyymmddhh24miss=> '20181016214239',
   p_required_roles=> wwv_flow_utilities.string_to_table2(''));
  
  
@@ -7301,37 +7301,40 @@ wwv_flow_api.create_plugin (
 '    exception'||chr(10)||
 '      when others'||chr(10)||
 '      then'||chr(10)||
-'        if i = 1 and instr( sqlerrm, ''PLS-00201: identifier '' ) > 0'||chr(10)||
+'        if i = 1'||chr(10)||
+'             and (  instr( sqlerrm, ''PLS-00201:'' ) > 0 -- identifier ''APEX2XLSX'' must be declared'||chr(10)||
+'                 or instr( sqlerrm, ''PLS-00905:'' ) > 0 -- object <owner>.APEX2XLSX is invalid'||chr(10)||
+'                 )'||chr(10)||
 '        then'||chr(10)||
 '          select pgf.file_content'||chr(10)||
 '          into l_ddl'||chr(10)||
 '          from apex_appl_plugin_files pgf'||chr(10)||
-'          where pgf.plugin_name = p_plugin.name'||chr(10)||
+'    '||
+'      where pgf.plugin_name = p_plugin.name'||chr(10)||
 '          and   pgf.application_id = apex_application.g_flow_id'||chr(10)||
-'          and   pgf.file_name   = ''apex2xlsx.sql'';'||chr(10)||
-'-'||
-'-'||chr(10)||
+'          and   pgf.file_name = ''apex2xlsx.sql'';'||chr(10)||
+'--'||chr(10)||
 '          dbms_lob.createtemporary( l_fnc, true, dbms_lob.call );'||chr(10)||
 '          dbms_lob.converttoclob( l_fnc, l_ddl, dbms_lob.lobmaxsize, dest_offset, src_offset, dbms_lob.default_csid , lang_context, warning );'||chr(10)||
 '--'||chr(10)||
-'          for i in 1 .. 25000'||chr(10)||
+'          for i in 1 .. 2500'||
+'0'||chr(10)||
 '          loop'||chr(10)||
 '            l_pos := instr( l_fnc, l_cr, l_start );'||chr(10)||
 '            if l_pos > 0'||chr(10)||
 '            then'||chr(10)||
-'              l_ddl_tab( i ) := ltrim( substr( '||
-'l_fnc, l_start, l_pos - l_start ), l_lf );'||chr(10)||
+'              l_ddl_tab( i ) := ltrim( substr( l_fnc, l_start, l_pos - l_start ), l_lf );'||chr(10)||
 '              l_start := l_pos + 1;'||chr(10)||
 '            else'||chr(10)||
 '              l_ddl_tab( i ) := ltrim( substr( l_fnc, l_start ), l_lf ); '||chr(10)||
 '              exit;'||chr(10)||
 '            end if;          '||chr(10)||
 '          end loop;'||chr(10)||
-'          dbms_lob.freetemporary( l_fnc );'||chr(10)||
+'  '||
+'        dbms_lob.freetemporary( l_fnc );'||chr(10)||
 '--'||chr(10)||
 '          l_cur := dbms_sql.open_cursor;'||chr(10)||
-'          dbms_sql.parse( l_cur, l_ddl_tab, 1, l_ddl_tab.count, true, dbm'||
-'s_sql.native );'||chr(10)||
+'          dbms_sql.parse( l_cur, l_ddl_tab, 1, l_ddl_tab.count, true, dbms_sql.native );'||chr(10)||
 '          dbms_sql.close_cursor( l_cur );'||chr(10)||
 '        else'||chr(10)||
 '          raise;'||chr(10)||
